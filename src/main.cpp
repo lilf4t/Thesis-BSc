@@ -89,7 +89,7 @@ void printHex(byte *buffer, byte bufferSize) {
 }
 
 /**
- * Helper routine to dump a byte array as dec values to Serial.
+ * Helper routine to dump a byte array as dec values to Serial..
  */
 void printDec(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
