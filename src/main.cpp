@@ -3,6 +3,8 @@
 
 //hej
 
+//hejdå
+
 // Definiera RFID-pinnar
 #define SS_PIN_1 5  
 #define SS_PIN_2 4  
