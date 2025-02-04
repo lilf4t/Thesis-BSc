@@ -10,6 +10,8 @@
             "includePath": [
                 "c:/kurser/da340b/ProjektKod/include",
                 "c:/kurser/da340b/ProjektKod/src",
+                "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
+                "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PubSubClient/src",
                 "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/MFRC522/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
@@ -230,7 +232,6 @@
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
-                "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
@@ -241,6 +242,8 @@
                 "path": [
                     "c:/kurser/da340b/ProjektKod/include",
                     "c:/kurser/da340b/ProjektKod/src",
+                    "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
+                    "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PubSubClient/src",
                     "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/MFRC522/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
@@ -461,7 +464,6 @@
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
-                    "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
