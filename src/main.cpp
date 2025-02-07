@@ -1,6 +1,6 @@
 #include <SPI.h>
 #include <MFRC522.h>
-#include <WiFi.h> // Assuming you are using WiFi for ESP32
+#include <WiFi.h> 
 #include <PubSubClient.h> // Include MQTT library 
 
 // Definiera RFID-pinnar
@@ -11,6 +11,8 @@
 // LED-pinnar
 #define LED1 16  // Lyser när RFID1 läser ett kort
 #define LED2 17  // Lyser när RFID2 läser ett kort
+
+#define TIMEOUT 20000 // 20s
 
 // Skapa RFID-objekt
 MFRC522 rfid1(SS_PIN_1, RST_PIN);
@@ -27,13 +29,58 @@ void printDec(byte *buffer, byte bufferSize);
 void readRFID(MFRC522 &rfid, byte *nuidPICC, int readerID, int ledPin);
 
 // WiFi and MQTT credentials
-const char* ssid = "eduroam";  // Replace with your WiFi SSID
-const char* password = "XBqj+238";  // Replace with your WiFi password
-const char* mqtt_server = "172.20.10.3"; // Replace with your MQTT broker IP address
+const char* ssid = "FATIMA ";  // Replace with your WiFi SSID
+const char* password = "fatima2002";  // Replace with your WiFi password
+const char* mqtt_server = "192.168.1.116"; // Replace with your MQTT broker IP address
 const char* topic = "rfid/reader"; // MQTT topic
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+void connectToWiFi() {
+  WiFi.scanNetworks();
+  Serial.println("Scanning networks");
+
+  // printa ut alla available networks
+  Serial.print("Available networks: ");
+  for (int i = 0; i < WiFi.scanComplete(); i++) {
+    Serial.print(WiFi.SSID(i));
+    Serial.print(":");
+    Serial.println(WiFi.RSSI(i));
+  }
+  delay(1000);
+  Serial.print("Connecting to Wifi");
+  WiFi.mode(WIFI_STA); // connect till existerande network, AP mode hade varit ifall vi vill att ESP ska ha en egen Wifi
+  WiFi.begin(ssid, password);
+
+  unsigned long start = millis();
+
+  while(WiFi.status() != WL_CONNECTED && millis() - start < TIMEOUT) {
+    Serial.print(".");
+    delay(100);
+  }
+
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("Connected to Wifi");
+    Serial.print("IP address: " + WiFi.localIP().toString());
+  } else {
+    Serial.println("Failed to connect to Wifi");
+  }
+}
+
+void connectToMQTT() {
+
+}
+
+void loop() {
+    // Läs från den första RFID-läsaren och styr LED1
+    readRFID(rfid1, nuidPICC_1, 1, LED1);
+    
+    // Läs från den andra RFID-läsaren och styr LED2
+    readRFID(rfid2, nuidPICC_2, 2, LED2);
+
+    client.loop(); // Keep the MQTT client connection alive
+}
 
 void setup() {
     Serial.begin(115200);
@@ -55,41 +102,11 @@ void setup() {
         key.keyByte[i] = 0xFF;
     }
 
+    connectToWiFi();
+
+    connectToMQTT();
+
     Serial.println(F("Systemet är redo att läsa RFID-taggar från två läsare."));
-
-    // Connect to WiFi
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
-    }
-    Serial.println("Connected to WiFi");
-    delay(5000);
-    Serial.println("ESP32 IP Address: " + WiFi.localIP()); 
-
-    // Connect to MQTT broker
-  client.setServer(mqtt_server, 1883); // Default MQTT port
-  while (!client.connected()) {
-    Serial.println("Connecting to MQTT broker...");
-    if (client.connect("ESP32Client")) { // Replace "ESP32Client" with a client ID 
-      Serial.println("Connected to MQTT broker");
-    } else {
-      Serial.print("Failed to connect to MQTT broker, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
-    }
-  } 
-}
-
-void loop() {
-    // Läs från den första RFID-läsaren och styr LED1
-    readRFID(rfid1, nuidPICC_1, 1, LED1);
-    
-    // Läs från den andra RFID-läsaren och styr LED2
-    readRFID(rfid2, nuidPICC_2, 2, LED2);
-
-    client.loop(); // Keep the MQTT client connection alive
 }
 
 void readRFID(MFRC522 &rfid, byte *nuidPICC, int readerID, int ledPin) {
@@ -119,11 +136,6 @@ void readRFID(MFRC522 &rfid, byte *nuidPICC, int readerID, int ledPin) {
         Serial.print(F("[Läsare "));
         Serial.print(readerID);
         Serial.println(F("] Nytt kort har detekterats."));
-
-        // Publish reader ID to MQTT topic
-        char msg[3];
-        sprintf(msg, "%d", readerID); 
-        client.publish(topic, msg);  
 
         // Spara UID i arrayen
         for (byte i = 0; i < 4; i++) {

@@ -10,6 +10,8 @@
             "includePath": [
                 "c:/kurser/da340b/ProjektKod/include",
                 "c:/kurser/da340b/ProjektKod/src",
+                "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PicoMQTT/src",
+                "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/ESP32Ping",
                 "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PubSubClient/src",
                 "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/MFRC522/src",
@@ -242,6 +244,8 @@
                 "path": [
                     "c:/kurser/da340b/ProjektKod/include",
                     "c:/kurser/da340b/ProjektKod/src",
+                    "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PicoMQTT/src",
+                    "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/ESP32Ping",
                     "C:/Users/fatim/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/PubSubClient/src",
                     "c:/kurser/da340b/ProjektKod/.pio/libdeps/nodemcu-32s/MFRC522/src",
