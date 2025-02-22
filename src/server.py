@@ -1,24 +1,29 @@
-# import tkinter as tk
-# from paho.mqtt import client as mqtt_client 
+import paho.mqtt.client as mqtt
 
-# def on_message(client, userdata, msg): 
-#     reader_id = msg.payload.decode()  
-#     label['text'] = f"RFID Reader {reader_id} Detected a Tag!" 
+# Callback when the client receives a CONNACK response from the broker.
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+    print("-----------------------------------------------------------")
+    # Subscribe to the "rfid/reader" topic
+    client.subscribe("rfid/reader")
 
-# def connect_mqtt(): 
-#     client = mqtt_client.Client("PythonSubscriber", callback_api_version=2.1) 
-#     client.connect("192.168.1.151", 1883) # Replace with your MQTT broker details
-#     client.subscribe("rfid/reader") 
-#     client.on_message = on_message  
-#     client.loop_start()
-#     return client
+# Callback when a PUBLISH message is received from the broker.
+def on_message(client, userdata, msg):
+    # Decode the payload and print it along with the topic
+    payload_str = msg.payload.decode()
+    print(payload_str)
 
-# # GUI setup 
-# window = tk.Tk()
-# window.title("RFID Reader Status") 
+# Broker settings (update these if needed)
+broker_address = "172.20.10.3"
+broker_port = 1883
 
-# label = tk.Label(window, text="Waiting for RFID tag...", font=("Arial", 24)) 
-# label.pack(pady=50)
+# Create an MQTT client instance.
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
 
-# client = connect_mqtt() # Connect to MQTT broker
-# window.mainloop()
+# Connect to the broker.
+client.connect(broker_address, broker_port, keepalive=60)
+
+# Process network traffic and dispatch callbacks.
+client.loop_forever()
