@@ -5,7 +5,7 @@
 
 // // CS-pins
 // Adafruit_PN532 reader6(21);
-// Adafruit_PN532 reader7(22);
+// Adafruit_PN532 reader7(4);
 // Adafruit_PN532 reader8(25);
 // Adafruit_PN532 reader9(26);
 

@@ -1,6 +1,7 @@
 import tkinter as tk
 import paho.mqtt.client as mqtt
 import pygame
+from tkinter import simpledialog
 
 # === Fördefinierade taggar ===
 X_TAGS = {"FF0F1ADE5C0000", "FF0FC7FE5B0000", "53DA692AA00001", "FF0FCAFE5B0000", "53387D2AA00001"}
@@ -30,8 +31,48 @@ cells = [[None for _ in range(3)] for _ in range(3)]
 status_label = tk.Label(root, text="", font=("Arial", 20))
 status_label.grid(row=3, column=0, columnspan=3, pady=10)
 
+# === MQTT
+broker_ip = "172.20.10.3"
+client = mqtt.Client()
+client.connect(broker_ip, 1883, 60)
+
+# === Player names
+player1_name = ""
+player2_name = ""
+
+MQTT_TOPIC_NFC = "game/nfc/reader"
+MQTT_TOPIC_PLAYERS = "game/players"
+MQTT_TOPIC_STATUS = "game/status"
+MQTT_TOPIC_BOARD = "game/board"
+
+
+def get_player_names():
+    global player1_name, player2_name
+    
+    root.withdraw()
+    
+    player1_name = simpledialog.askstring("Player 1", "Enter name for Player 1 (X):", parent=root)
+    if player1_name is None or player1_name.strip() == "":
+        player1_name = "Player 1"
+    
+    player2_name = simpledialog.askstring("Player 2", "Enter name for Player 2 (O):", parent=root)
+    if player2_name is None or player2_name.strip() == "":
+        player2_name = "Player 2"
+    
+    # Send player names to LCD ESP32
+    client.publish(MQTT_TOPIC_PLAYERS, f"player1:{player1_name}")
+    client.publish(MQTT_TOPIC_PLAYERS, f"player2:{player2_name}")
+    
+    root.deiconify()
+    update_status(f"🎯 {player1_name} (X) börjar")
+
 def update_status(msg):
     status_label.config(text=msg)
+    client.publish(MQTT_TOPIC_STATUS, msg)
+    
+def publish_board_state():
+    board_state = ";".join([",".join(row) for row in board])
+    client.publish(MQTT_TOPIC_BOARD, board_state)
 
 def highlight_possible_moves():
     for row in range(3):
@@ -66,7 +107,8 @@ def end_game(winner):
     if winner == "draw":
         update_status("🔁 Oavgjort!")
     else:
-        update_status(f"🏆 Spelare {winner} vann!")
+        winner_name = player1_name if winner == "X" else player2_name
+        update_status(f"🏆 {winner_name} vann!")
 
 def update_cell(row, col, player):
     global current_player
@@ -79,8 +121,10 @@ def update_cell(row, col, player):
             end_game(winner)
         else:
             current_player = "O" if current_player == "X" else "X"
-            update_status(f"🎯 Spelare {current_player}s tur")
+            current_player_name = player1_name if current_player == "X" else player2_name
+            update_status(f"🎯 {current_player_name}s tur")
             highlight_possible_moves()
+            publish_board_state()
 
 # === Återställ spelet
 def reset_game():
@@ -95,7 +139,7 @@ def reset_game():
 
     pygame.mixer.music.load("intro.mp3")
     pygame.mixer.music.play()
-    update_status("🎯 Spelare X börjar")
+    update_status(f"🎯 {player1_name} börjar")
     highlight_possible_moves()
     
     # delay
@@ -113,10 +157,9 @@ for row in range(3):
 reset_button = tk.Button(root, text="🔁 Starta om spel", font=("Arial", 14), command=reset_game)
 reset_button.grid(row=4, column=0, columnspan=3, pady=10)
 
-# === MQTT
 def on_connect(client, userdata, flags, rc):
     print("✅ Ansluten till MQTT")
-    client.subscribe("rfid/reader")
+    client.subscribe(MQTT_TOPIC_NFC)
 
 def on_message(client, userdata, msg):
     global current_player
@@ -152,17 +195,15 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print("⚠️ Fel i meddelande:", e)
 
-broker_ip = "172.20.10.3"
-client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect(broker_ip, 1883, 60)
 
 def mqtt_loop():
     client.loop(timeout=0.1)
     root.after(100, mqtt_loop)
 
-update_status("🎯 Spelare X börjar")
-highlight_possible_moves()
+# Get player names before starting the game
+root.after(100, get_player_names)
+
 mqtt_loop()
 root.mainloop()
