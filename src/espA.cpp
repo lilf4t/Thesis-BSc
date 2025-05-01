@@ -1,105 +1,107 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include <SPI.h>
-#include <Adafruit_PN532.h>
+// #include <WiFi.h>
+// #include <PubSubClient.h>
+// #include <SPI.h>
+// #include <Adafruit_PN532.h>
 
-// CS-pins
-Adafruit_PN532 reader1(4);
-Adafruit_PN532 reader2(21);
-Adafruit_PN532 reader3(17);
-Adafruit_PN532 reader4(5);
-Adafruit_PN532 reader5(25);
+// // CS-pins
+// Adafruit_PN532 reader1(5);
+// Adafruit_PN532 reader2(17);
+// Adafruit_PN532 reader3(21);
+// Adafruit_PN532 reader4(25);
+// Adafruit_PN532 reader5(26);
 
-Adafruit_PN532* readers[5] = { &reader1, &reader2, &reader3, &reader4, &reader5 };
-const char* names[5] = { "reader1", "reader2", "reader3", "reader4", "reader5" };
-bool readerActive[5] = { false };
+// Adafruit_PN532* readers[5] = { &reader1, &reader2, &reader3, &reader4, &reader5 };
+// const char* names[5] = { "reader1", "reader2", "reader3", "reader4", "reader5" };
+// bool readerActive[5] = { false };
 
-// Track the last read UID for each reader
-String lastReadUID[5] = { "", "", "", "", "" };
-// Track if a tag is currently present on each reader
-bool tagPresent[5] = { false, false, false, false, false };
+// // Track the last read UID for each reader
+// String lastReadUID[5] = { "", "", "", "", "" };
+// // Track if a tag is currently present on each reader
+// bool tagPresent[5] = { false, false, false, false, false };
 
-const char* ssid = "fatimas lur";           // ZyXELDC2470
-const char* password = "jagvetinte";       // KEHXTVRUHF7JF
-const char* mqtt_server = "172.20.10.3";  // 192.168.1.57, 172.20.10.3
+// const char* ssid = "fatimas lur";           // ZyXELDC2470
+// const char* password = "jagvetinte";       // KEHXTVRUHF7JF
+// const char* mqtt_server = "172.20.10.3";  // 192.168.1.57, 172.20.10.3
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+// WiFiClient espClient;
+// PubSubClient client(espClient);
 
-void setupWiFi() {
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("WiFi connected");
-}
+// void setupWiFi() {
+//   WiFi.begin(ssid, password);
+//   while (WiFi.status() != WL_CONNECTED) {
+//     delay(500);
+//     Serial.print(".");
+//   }
+//   Serial.println("WiFi connected");
+// }
 
-void reconnectMQTT() {
-  while (!client.connected()) {
-    if (client.connect("ESP32A")) break;
-    delay(1000);
-  }
-}
+// void reconnectMQTT() {
+//   while (!client.connected()) {
+//     if (client.connect("ESP32A")) break;
+//     delay(1000);
+//   }
+// }
 
-void setup() {
-  Serial.begin(115200);
-  setupWiFi();
-  client.setServer(mqtt_server, 1883);
+// void setup() {
+//   Serial.begin(115200);
+//   setupWiFi();
+//   client.setServer(mqtt_server, 1883);
 
-  for (int i = 0; i < 5; i++) {
-    readers[i]->begin();
-    uint32_t versiondata = readers[i]->getFirmwareVersion();
-    if (versiondata) {
-      readers[i]->SAMConfig();
-      readerActive[i] = true;
-      Serial.print(names[i]); Serial.println(" aktiv");
-    }
-  }
-}
+//   for (int i = 0; i < 5; i++) {
+//     readers[i]->begin();
+//     uint32_t versiondata = readers[i]->getFirmwareVersion();
+//     if (versiondata) {
+//       readers[i]->SAMConfig();
+//       readerActive[i] = true;
+//       Serial.print(names[i]); Serial.println(" aktiv");
+//     }
+//   }
+// }
 
-void loop() {
-  if (!client.connected()) reconnectMQTT();
-  client.loop();
+// void loop() {
+//   if (!client.connected()) reconnectMQTT();
+//   client.loop();
 
-  // Check each reader in sequence with a small delay between them
-  for (int i = 0; i < 5; i++) {
-    if (!readerActive[i]) continue;
+//   // Check each reader in sequence with a small delay between them
+//   for (int i = 0; i < 5; i++) {
+//     if (!readerActive[i]) continue;
 
-    // Small delay between checking each reader to give it time to initialize
-    delay(10);
+//     // Small delay between checking each reader to give it time to initialize
+//     delay(10);
 
-    uint8_t uid[7];
-    uint8_t uidLength;
+//     uint8_t uid[7];
+//     uint8_t uidLength;
 
-    if (readers[i]->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
-      // Tag detected
-      char uidStr[32] = "";
-      for (int j = 0; j < uidLength; j++) {
-        char byteStr[4];
-        sprintf(byteStr, "%02X", uid[j]);
-        strcat(uidStr, byteStr);
-      }
+//     if (readers[i]->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
+//       // Tag detected
+//       char uidStr[32] = "";
+//       for (int j = 0; j < uidLength; j++) {
+//         char byteStr[4];
+//         sprintf(byteStr, "%02X", uid[j]);
+//         strcat(uidStr, byteStr);
+//       }
       
-      String currentUID = String(uidStr);
+//       String currentUID = String(uidStr);
       
-      // Only process if this is a new tag or a tag that was previously removed
-      if (currentUID != lastReadUID[i] || !tagPresent[i]) {
-        String payload = String(names[i]) + ":" + currentUID;
-        client.publish("game/nfc/reader", payload.c_str());  // Changed topic
-        Serial.println("Skickat → " + payload);
+//       // Only process if this is a new tag or a tag that was previously removed
+//       if (currentUID != lastReadUID[i] || !tagPresent[i]) {
+//         String payload = String(names[i]) + ":" + currentUID;
+//         client.publish("game/nfc/reader", payload.c_str());  // Changed topic
+//         Serial.println("Skickat → " + payload);
         
-        // Update tracking variables
-        lastReadUID[i] = currentUID;
-        tagPresent[i] = true;
-        }   
-    } else {
-      // No tag detected on this reader
-      if (tagPresent[i]) {
-        // Tag was removed, reset the tracking
-        tagPresent[i] = false;
-        Serial.print(names[i]); Serial.println(" tag removed");
-      }
-    }
-  }
-}
+//         // Update tracking variables
+//         lastReadUID[i] = currentUID;
+//         tagPresent[i] = true;
+//         }   
+//     } else {
+//       // No tag detected on this reader
+//       if (tagPresent[i]) {
+//         // Tag was removed, reset the tracking
+//         tagPresent[i] = false;
+//         Serial.print(names[i]); Serial.println(" tag removed");
+//       }
+//     }
+//   }
+// }
+
+

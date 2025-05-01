@@ -4,14 +4,14 @@
 // #include <Adafruit_PN532.h>
 
 // // CS-pins
-// Adafruit_PN532 reader6(5);
-// Adafruit_PN532 reader7(17);
-// Adafruit_PN532 reader8(21);
-// Adafruit_PN532 reader9(25);
-// Adafruit_PN532 reader10(26);
+// Adafruit_PN532 reader11(5);
+// Adafruit_PN532 reader12(17);
+// Adafruit_PN532 reader13(21);
+// Adafruit_PN532 reader14(25);
+// Adafruit_PN532 reader15(26);
 
-// Adafruit_PN532* readers[5] = { &reader6, &reader7, &reader8, &reader9, &reader10 };
-// const char* names[5] = { "reader6", "reader7", "reader8", "reader9", "reader10" };
+// Adafruit_PN532* readers[5] = { &reader11, &reader12, &reader13, &reader14, &reader15 };
+// const char* names[5] = { "reader11", "reader12", "reader13", "reader14", "reader15" };
 // bool readerActive[5] = { false };
 
 // // Track the last read UID for each reader
@@ -37,7 +37,7 @@
 
 // void reconnectMQTT() {
 //   while (!client.connected()) {
-//     if (client.connect("ESP32B")) break;
+//     if (client.connect("ESP32C")) break;
 //     delay(1000);
 //   }
 // }
