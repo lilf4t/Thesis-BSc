@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import pygame
 
 class BaseTicTacToe:
@@ -23,11 +24,11 @@ class BaseTicTacToe:
         self.current_player = "X"
         
         # NFC Tags and Reader positions
-        self.X_TAGS = {"53DA692AA00001", "53387D2AA00001", "FF0F1ADE5C0000", "FF0FC7FE5B0000", "FF0FCAFE5B0000"}
+        self.X_TAGS = {"8916C201", "16B10F02", "3EA6B001", "2E3EB501", "296DB701"}
         self.READER_POSITIONS = {
-            "reader6": (0, 0), "reader7": (0, 1), "reader8": (0, 2),
-            "reader9": (1, 0), "reader10": (1, 1), "reader12": (1, 2),
-            "reader14": (2, 0), "reader15": (2, 1), "reader16": (2, 2),
+            "reader10": (0, 0), "reader11": (0, 1), "reader12": (0, 2),
+            "reader13": (1, 0), "reader1": (1, 1), "reader2": (1, 2),
+            "reader5": (2, 0), "reader4": (2, 1), "reader3": (2, 2),
         }
         
         # GUI setup
@@ -112,7 +113,7 @@ class BaseTicTacToe:
 class TicTacToe(BaseTicTacToe):
     def __init__(self, root, client):
         super().__init__(root, client)
-        self.O_TAGS = {"FF0FC9FE5B0000", "FF0FC8FE5B0000", "53055E2AA00001", "5387642AA00001"}
+        self.O_TAGS = {"77700E02", "7A1CB201", "4A78C901", "91A30D02", "DB97B101"}
         
     def get_player_names(self):
         self.root.withdraw()  # Hide main window
@@ -168,6 +169,7 @@ class TicTacToe(BaseTicTacToe):
 
                 if player != self.current_player:
                     print(f"It's {self.current_player}'s turn.")
+                    messagebox.showwarning("Wrong Turn", f"It's {self.current_player}'s turn.")
                     return
 
                 if reader in self.READER_POSITIONS:

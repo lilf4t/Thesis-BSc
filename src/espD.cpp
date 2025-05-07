@@ -7,17 +7,19 @@
 // #include <Adafruit_PN532.h>
 
 // // CS-pin for NFC reader
-// Adafruit_PN532 reader16(17);
+// Adafruit_PN532 reader14(17);
+// Adafruit_PN532 reader15(4);
+// Adafruit_PN532 reader16(21); 
 
-// // Array of readers and their names (only one reader)
-// Adafruit_PN532* readers[1] = { &reader16 };
-// const char* names[1] = { "reader16" };
-// bool readerActive[1] = { false };
+// // Array of readers and their names
+// Adafruit_PN532* readers[3] = { &reader14, &reader15, &reader16 };
+// const char* names[3] = { "reader14", "reader15", "reader16" };
+// bool readerActive[3] = { false, false, false };
 
-// // Track the last read UID for the reader
-// String lastReadUID[1] = { "" };
-// // Track if a tag is currently present on the reader
-// bool tagPresent[1] = { false };
+// // Track the last read UID for each reader
+// String lastReadUID[3] = { "", "", "" };
+// // Track if a tag is currently present on each reader
+// bool tagPresent[3] = { false, false, false };
 
 // // Button pins - using different pins to avoid conflicts
 // const int button1Pin = 32; // Tic tac toe
@@ -64,13 +66,15 @@
 //   pinMode(button1Pin, INPUT_PULLUP);
 //   pinMode(button2Pin, INPUT_PULLUP);
 
-//   // Setup NFC reader
-//   readers[0]->begin();
-//   uint32_t versiondata = readers[0]->getFirmwareVersion();
-//   if (versiondata) {
-//     readers[0]->SAMConfig();
-//     readerActive[0] = true;
-//     Serial.print(names[0]); Serial.println(" aktiv");
+//   // Setup all NFC readers
+//   for (int i = 0; i < 3; i++) {
+//     readers[i]->begin();
+//     uint32_t versiondata = readers[i]->getFirmwareVersion();
+//     if (versiondata) {
+//       readers[i]->SAMConfig();
+//       readerActive[i] = true;
+//       Serial.print(names[i]); Serial.println(" aktiv");
+//     }
 //   }
 // }
 
@@ -111,42 +115,44 @@
 //     }
 //   }
 
-//   // Check the reader
-//   if (!readerActive[0]) return;
+//   // Check each reader in sequence
+//   for (int i = 0; i < 3; i++) {
+//     if (!readerActive[i]) continue;
 
-//   // Small delay to give the reader time to initialize
-//   delay(10);
+//     // Small delay between checking each reader to give it time to initialize
+//     delay(10);
 
-//   uint8_t uid[7];
-//   uint8_t uidLength;
+//     uint8_t uid[7];
+//     uint8_t uidLength;
 
-//   if (readers[0]->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
-//     // Tag detected
-//     char uidStr[32] = "";
-//     for (int j = 0; j < uidLength; j++) {
-//       char byteStr[4];
-//       sprintf(byteStr, "%02X", uid[j]);
-//       strcat(uidStr, byteStr);
-//     }
-    
-//     String currentUID = String(uidStr);
-    
-//     // Only process if this is a new tag or a tag that was previously removed
-//     if (currentUID != lastReadUID[0] || !tagPresent[0]) {
-//       String payload = String(names[0]) + ":" + currentUID;
-//       client.publish("game/nfc/reader", payload.c_str());
-//       Serial.println("Skickat → " + payload);
+//     if (readers[i]->readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100)) {
+//       // Tag detected
+//       char uidStr[32] = "";
+//       for (int j = 0; j < uidLength; j++) {
+//         char byteStr[4];
+//         sprintf(byteStr, "%02X", uid[j]);
+//         strcat(uidStr, byteStr);
+//       }
       
-//       // Update tracking variables
-//       lastReadUID[0] = currentUID;
-//       tagPresent[0] = true;
-//     }   
-//   } else {
-//     // No tag detected on the reader
-//     if (tagPresent[0]) {
-//       // Tag was removed, reset the tracking
-//       tagPresent[0] = false;
-//       Serial.print(names[0]); Serial.println(" tag removed");
+//       String currentUID = String(uidStr);
+      
+//       // Only process if this is a new tag or a tag that was previously removed
+//       if (currentUID != lastReadUID[i] || !tagPresent[i]) {
+//         String payload = String(names[i]) + ":" + currentUID;
+//         client.publish("game/nfc/reader", payload.c_str());
+//         Serial.println("Skickat → " + payload);
+        
+//         // Update tracking variables
+//         lastReadUID[i] = currentUID;
+//         tagPresent[i] = true;
+//       }   
+//     } else {
+//       // No tag detected on this reader
+//       if (tagPresent[i]) {
+//         // Tag was removed, reset the tracking
+//         tagPresent[i] = false;
+//         Serial.print(names[i]); Serial.println(" tag removed");
+//       }
 //     }
 //   }
 // }

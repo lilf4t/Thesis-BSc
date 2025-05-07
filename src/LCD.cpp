@@ -4,9 +4,13 @@
 // #include <PubSubClient.h>
 
 // // WiFi credentials
-// const char* ssid = "fatimas lur";           // ZyXELDC2470
-// const char* password = "jagvetinte";       // KEHXTVRUHF7JF
-// const char* mqtt_server = "172.20.10.3";  // 192.168.1.57, 172.20.10.3
+// // const char* ssid = "fatimas lur";   
+// // const char* password = "jagvetinte";       
+// // const char* mqtt_server = "172.20.10.3";  
+
+// const char* ssid = "ZyXELDC2470";
+// const char* password = "KEHXTVRUHF7JF";
+// const char* mqtt_server = "192.168.1.57";
 
 // // MQTT client
 // WiFiClient lcdClient; 
@@ -15,7 +19,11 @@
 // // Player names
 // String player1 = "";
 // String player2 = "";
+
 // bool gameStarted = false;  // Track if game has started
+
+// TFT_eSPI tft1 = TFT_eSPI();  
+// TFT_eSPI tft2 = TFT_eSPI();  
 
 // // Function to connect to WiFi
 // void setupWiFi() {
@@ -35,54 +43,87 @@
 //   }
 // }
 
-// TFT_eSPI tft = TFT_eSPI();  
-
 // // This function displays the player names on the top section of the screen
 // void displayPlayerNames() {
-//   // Clear the top section (names)
-//   tft.fillRect(0, 0, tft.width(), 60, TFT_BLACK);
-//   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-//   tft.setTextSize(3);
 
-//   // Display Player 1
-//   tft.setCursor(10, 10);
-//   tft.print("Player 1: ");
-//   tft.setCursor(10, 40);
-//   tft.print(player1);
+//     // Display on first screen
+//     digitalWrite(TFT_CS, LOW);    // Select first display
+//     digitalWrite(TFT_CS2, HIGH);  // Ensure second is deselected
+    
+//     tft1.fillRect(0, 0, tft1.width(), 60, TFT_BLACK);
+//     tft1.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft1.setTextSize(2);
+//     tft1.setCursor(10, 10);
+//     tft1.print(player1);
+//     tft1.print(" vs ");
+//     tft1.print(player2);
 
-//   // Display Player 2
-//   tft.setCursor(10, 90);
-//   tft.print("Player 2: ");
-//   tft.setCursor(10, 120);
-//   tft.print(player2); 
+//     digitalWrite(TFT_CS, HIGH);   // Deselect first display
+
+//     // Display on second screen
+//     digitalWrite(TFT_CS2, LOW);   // Select second display
+//     digitalWrite(TFT_CS, HIGH);   // Ensure first is deselected
+
+//     tft2.fillRect(0, 0, tft2.width(), 60, TFT_BLACK);
+//     tft2.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft2.setTextSize(2);
+//     tft2.setCursor(10, 10);
+//     tft2.print(player2);
+//     tft2.print(" vs ");
+//     tft2.print(player1);    
+    
+//     digitalWrite(TFT_CS2, HIGH);  // Deselect second display
 // }
 
+
 // void displayGameStatus(String status) {
-//     // Clear the bottom section (game status)
-//     tft.fillRect(0, 180, tft.width(), 40, TFT_BLACK);
-//     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-//     tft.setTextSize(2);
-//     tft.setCursor(10, 190);
-//     tft.print(status);
+//     // Display status on first screen
+//     digitalWrite(TFT_CS, LOW);    // Select first display
+//     digitalWrite(TFT_CS2, HIGH);  // Ensure second is deselected
+//     tft1.fillRect(0, 180, tft1.width(), 40, TFT_BLACK);
+//     tft1.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft1.setTextSize(2);
+//     tft1.setCursor(10, 190);
+//     tft1.print(status);
+//     digitalWrite(TFT_CS, HIGH);   // Deselect first display
+
+//     // Display status on second screen
+//     digitalWrite(TFT_CS2, LOW);   // Select second display
+//     digitalWrite(TFT_CS, HIGH);   // Ensure first is deselected
+//     tft2.fillRect(0, 180, tft2.width(), 40, TFT_BLACK);
+//     tft2.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft2.setTextSize(2);
+//     tft2.setCursor(10, 190);
+//     tft2.print(status);
+//     digitalWrite(TFT_CS2, HIGH);  // Deselect second display
 // }
 
 // void displayGameBoard(String boardState) {
-//     if (!gameStarted) return;  // Don't draw board if game hasn't started
+//     if (!gameStarted) return;
+
+//     // First display
+//     digitalWrite(TFT_CS, LOW);    // Select first display
+//     digitalWrite(TFT_CS2, HIGH);  // Ensure second is deselected
     
-//     // Clear the middle section (board)
-//     tft.fillRect(0, 60, tft.width(), 120, TFT_BLACK);
+//     tft1.fillRect(0, 60, tft1.width(), 120, TFT_BLACK);
+//     tft1.drawLine(10, 100, 230, 100, TFT_WHITE);
+//     tft1.drawLine(10, 140, 230, 140, TFT_WHITE);
+//     tft1.drawLine(80, 60, 80, 180, TFT_WHITE);
+//     tft1.drawLine(160, 60, 160, 180, TFT_WHITE);
     
-//     // Draw the board grid
-//     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-//     tft.setTextSize(3);
+//     digitalWrite(TFT_CS, HIGH);   // Deselect first display
+
+//     // Second display
+//     digitalWrite(TFT_CS2, LOW);   // Select second display
+//     digitalWrite(TFT_CS, HIGH);   // Ensure first is deselected
     
-//     // Draw horizontal lines
-//     tft.drawLine(10, 100, 230, 100, TFT_WHITE);
-//     tft.drawLine(10, 140, 230, 140, TFT_WHITE);
+//     tft2.fillRect(0, 60, tft2.width(), 120, TFT_BLACK);
+//     tft2.drawLine(10, 100, 230, 100, TFT_WHITE);
+//     tft2.drawLine(10, 140, 230, 140, TFT_WHITE);
+//     tft2.drawLine(80, 60, 80, 180, TFT_WHITE);
+//     tft2.drawLine(160, 60, 160, 180, TFT_WHITE);
     
-//     // Draw vertical lines
-//     tft.drawLine(80, 60, 80, 180, TFT_WHITE);
-//     tft.drawLine(160, 60, 160, 180, TFT_WHITE);
+//     digitalWrite(TFT_CS2, HIGH);  // Deselect second display
     
 //     // Draw X's and O's
 //     for(int i = 0; i < 9; i++) {
@@ -92,27 +133,67 @@
 //         int y = 70 + row * 40;
         
 //         if(boardState[i] == 'X') {
-//             tft.setTextColor(TFT_BLUE, TFT_BLACK);
-//             tft.setCursor(x, y);
-//             tft.print("X");
+//             // First display
+//             digitalWrite(TFT_CS, LOW);
+//             digitalWrite(TFT_CS2, HIGH);
+//             tft1.setTextColor(TFT_BLUE, TFT_BLACK);
+//             tft1.setCursor(x, y);
+//             tft1.print("X");
+//             digitalWrite(TFT_CS, HIGH);
+
+//             // Second display
+//             digitalWrite(TFT_CS2, LOW);
+//             digitalWrite(TFT_CS, HIGH);
+//             tft2.setTextColor(TFT_BLUE, TFT_BLACK);
+//             tft2.setCursor(x, y);
+//             tft2.print("X");
+//             digitalWrite(TFT_CS2, HIGH);
 //         }
 //         else if(boardState[i] == 'O') {
-//             tft.setTextColor(TFT_RED, TFT_BLACK);
-//             tft.setCursor(x, y);
-//             tft.print("O");
+//             // First display
+//             digitalWrite(TFT_CS, LOW);
+//             digitalWrite(TFT_CS2, HIGH);
+//             tft1.setTextColor(TFT_RED, TFT_BLACK);
+//             tft1.setCursor(x, y);
+//             tft1.print("O");
+//             digitalWrite(TFT_CS, HIGH);
+
+//             // Second display
+//             digitalWrite(TFT_CS2, LOW);
+//             digitalWrite(TFT_CS, HIGH);
+//             tft2.setTextColor(TFT_RED, TFT_BLACK);
+//             tft2.setCursor(x, y);
+//             tft2.print("O");
+//             digitalWrite(TFT_CS2, HIGH);
 //         }
 //     }
 // }
 
+
 // // This function displays the initial "Choose a game" message
 // void displayInitialMessage() {
-//     tft.fillScreen(TFT_BLACK);
-//     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-//     tft.setTextSize(3);
-//     tft.setCursor(10, 50);
-//     tft.print("Choose a");
-//     tft.setCursor(10, 100);
-//     tft.print("game...");
+
+//     digitalWrite(TFT_CS, LOW);
+//     digitalWrite(TFT_CS2, HIGH);
+//     tft1.fillScreen(TFT_BLACK);
+//     tft1.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft1.setTextSize(3);
+//     tft1.setCursor(10, 50);
+//     tft1.print("Choose a");
+//     tft1.setCursor(10, 100);
+//     tft1.print("game...");
+//     digitalWrite(TFT_CS, HIGH);
+
+//     digitalWrite(TFT_CS2, LOW);
+//     digitalWrite(TFT_CS, HIGH);
+//     tft2.fillScreen(TFT_BLACK);
+//     tft2.setTextColor(TFT_WHITE, TFT_BLACK);
+//     tft2.setTextSize(3);
+//     tft2.setCursor(10, 50);
+//     tft2.print("Choose a");
+//     tft2.setCursor(10, 100);
+//     tft2.print("game...");
+//     digitalWrite(TFT_CS2, HIGH);
 // }
 
 // // Callback function to handle incoming MQTT messages
@@ -153,13 +234,22 @@
 //     Serial.begin(115200);
     
 //     // Initialize LCD
-//     tft.init();
-//     tft.setRotation(1);
-//     tft.fillScreen(TFT_BLACK);
-//     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-//     tft.setTextSize(2);
-//     tft.setCursor(10, 10);
-//     tft.println("Connecting...");
+//     pinMode(TFT_CS, OUTPUT);
+//     pinMode(TFT_CS2, OUTPUT);
+//     digitalWrite(TFT_CS, HIGH);   // Deselect first display
+//     digitalWrite(TFT_CS2, HIGH);  // Deselect second display
+    
+//     // Initialize first display
+//     digitalWrite(TFT_CS, LOW);    // Select first display
+//     tft1.init();
+//     tft1.setRotation(1);
+//     digitalWrite(TFT_CS, HIGH);   // Deselect first display
+    
+//     // Initialize second display
+//     digitalWrite(TFT_CS2, LOW);   // Select second display
+//     tft2.init();
+//     tft2.setRotation(1);
+//     digitalWrite(TFT_CS2, HIGH);  // Deselect second display
     
 //     // Connect to WiFi
 //     setupWiFi();

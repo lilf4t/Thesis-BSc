@@ -6,18 +6,18 @@
 // // CS-pins
 // Adafruit_PN532 reader6(5);
 // Adafruit_PN532 reader7(17);
-// Adafruit_PN532 reader8(21);
+// Adafruit_PN532 reader8(26);
 // Adafruit_PN532 reader9(25);
-// Adafruit_PN532 reader10(26);
 
-// Adafruit_PN532* readers[5] = { &reader6, &reader7, &reader8, &reader9, &reader10 };
-// const char* names[5] = { "reader6", "reader7", "reader8", "reader9", "reader10" };
-// bool readerActive[5] = { false };
+
+// Adafruit_PN532* readers[4] = { &reader6, &reader7, &reader8, &reader9, };
+// const char* names[4] = { "reader6", "reader7", "reader8", "reader9"};
+// bool readerActive[4] = { false };
 
 // // Track the last read UID for each reader
-// String lastReadUID[5] = { "", "", "", "", "" };
+// String lastReadUID[4] = { "", "", "", "" };
 // // Track if a tag is currently present on each reader
-// bool tagPresent[5] = { false, false, false, false, false };
+// bool tagPresent[4] = { false, false, false, false};
 
 // const char* ssid = "fatimas lur";           // ZyXELDC2470
 // const char* password = "jagvetinte";       // KEHXTVRUHF7JF
@@ -47,7 +47,7 @@
 //   setupWiFi();
 //   client.setServer(mqtt_server, 1883);
 
-//   for (int i = 0; i < 5; i++) {
+//   for (int i = 0; i < 4; i++) {
 //     readers[i]->begin();
 //     uint32_t versiondata = readers[i]->getFirmwareVersion();
 //     if (versiondata) {
@@ -63,7 +63,7 @@
 //   client.loop();
 
 //   // Check each reader in sequence with a small delay between them
-//   for (int i = 0; i < 5; i++) {
+//   for (int i = 0; i < 4; i++) {
 //     if (!readerActive[i]) continue;
 
 //     // Small delay between checking each reader to give it time to initialize

@@ -11,6 +11,7 @@
 // // GPIO-pins
 // const int button1Pin = 4; // Tic tac toe
 // const int button2Pin = 5; // Tic tac toe AI
+// const int button3Pin = 17; // Othello
 
 // void setupWiFi() {
 //     delay(10);
@@ -46,6 +47,7 @@
 //     // Ställ in knappar som ingångar
 //     pinMode(button1Pin, INPUT_PULLUP);
 //     pinMode(button2Pin, INPUT_PULLUP);
+//     pinMode(button3Pin, INPUT_PULLUP);
 
 //     Serial.println("Systemet är redo. Tryck på en knapp för att välja ett spel.");
 // }
@@ -67,6 +69,14 @@
 //     // Kontrollera om knapp 2 trycks in
 //     if (digitalRead(button2Pin) == LOW) {
 //         String gameMessage = "tic_tac_toe_ai";
+//         client.publish("server/game/select", gameMessage.c_str());
+//         Serial.println("Meddelande skickat: " + gameMessage);
+//         delay(1000); // Debounce-fördröjning
+//     }
+
+//     // Kontrollera om knapp 3 trycks in
+//     if (digitalRead(button3Pin) = LOW) {
+//         String gameMessage = "othello";
 //         client.publish("server/game/select", gameMessage.c_str());
 //         Serial.println("Meddelande skickat: " + gameMessage);
 //         delay(1000); // Debounce-fördröjning
