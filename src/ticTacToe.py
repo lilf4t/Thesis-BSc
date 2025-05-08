@@ -26,9 +26,9 @@ class BaseTicTacToe:
         # NFC Tags and Reader positions
         self.X_TAGS = {"8916C201", "16B10F02", "3EA6B001", "2E3EB501", "296DB701"}
         self.READER_POSITIONS = {
-            "reader10": (0, 0), "reader11": (0, 1), "reader12": (0, 2),
-            "reader13": (1, 0), "reader1": (1, 1), "reader2": (1, 2),
-            "reader5": (2, 0), "reader4": (2, 1), "reader3": (2, 2),
+            "reader1": (0, 0), "reader2": (0, 1), "reader3": (0, 2),
+            "reader4": (1, 0), "reader5": (1, 1), "reader6": (1, 2),
+            "reader7": (2, 0), "reader8": (2, 1), "reader9": (2, 2),
         }
         
         # GUI setup
@@ -63,10 +63,25 @@ class BaseTicTacToe:
     def highlight_possible_moves(self):
         for row in range(3):
             for col in range(3):
-                if self.board[row][col] == "" and not self.game_over:
-                    self.cells[row][col].config(bg="#ddffdd")
+                if self.board[row][col] == "":
+                    if self.current_player == "X":
+                        self.cells[row][col].config(bg="#C8DAFF")  # Blå för X
+                        # Send LED state for available move
+                        msg = f"{row},{col},available_x"
+                        print(f"Sending LED state: {msg}")
+                        self.client.publish("game/led_state", msg)
+                    elif self.current_player == "O":
+                        self.cells[row][col].config(bg="#FFC8C8")  # Röd för O
+                        # Send LED state for available move
+                        msg = f"{row},{col},available_o"
+                        print(f"Sending LED state: {msg}")
+                        self.client.publish("game/led_state", msg)
                 else:
-                    self.cells[row][col].config(bg="white")
+                    self.cells[row][col].config(bg="white")  # Vit för redan spelade celler
+                    # Send LED state for taken spot
+                    msg = f"{row},{col},taken"
+                    print(f"Sending LED state: {msg}")
+                    self.client.publish("game/led_state", msg)
 
     def check_winner(self):
         lines = [
@@ -91,9 +106,49 @@ class BaseTicTacToe:
 
         if winner == "draw":
             self.update_status("It's a draw!")
+            # Flash all cells in white for draw
+            for row in range(3):
+                for col in range(3):
+                    self.cells[row][col].config(bg="white")
+                    self.client.publish("game/led_state", f"{row},{col},flash_white")
         else:
             winner_name = self.player1_name if winner == "X" else self.player2_name
             self.update_status(f"{winner_name} Won!")
+            # Flash all cells in winner's color
+            for row in range(3):
+                for col in range(3):
+                    if winner == "X":
+                        self.cells[row][col].config(bg="#C8DAFF")  # Blue for X
+                        self.client.publish("game/led_state", f"{row},{col},flash_blue")
+                    else:
+                        self.cells[row][col].config(bg="#FFC8C8")  # Red for O
+                        self.client.publish("game/led_state", f"{row},{col},flash_red")
+
+        # Start flashing animation
+        self.flash_count = 0
+        self.flash_winner(winner)
+
+    def flash_winner(self, winner):
+        if self.flash_count < 6:  # Flash 3 times (6 state changes)
+            if self.flash_count % 2 == 0:
+                # Turn all cells to winner's color
+                for row in range(3):
+                    for col in range(3):
+                        if winner == "X":
+                            self.cells[row][col].config(bg="#C8DAFF")
+                            self.client.publish("game/led_state", f"{row},{col},flash_blue")
+                        else:
+                            self.cells[row][col].config(bg="#FFC8C8")
+                            self.client.publish("game/led_state", f"{row},{col},flash_red")
+            else:
+                # Turn all cells to white
+                for row in range(3):
+                    for col in range(3):
+                        self.cells[row][col].config(bg="white")
+                        self.client.publish("game/led_state", f"{row},{col},flash_white")
+            
+            self.flash_count += 1
+            self.root.after(500, lambda: self.flash_winner(winner))  # Flash every 500ms
 
     def reset_game(self):
         self.board = [["" for _ in range(3)] for _ in range(3)]
@@ -142,6 +197,9 @@ class TicTacToe(BaseTicTacToe):
             self.board[row][col] = player
             self.cells[row][col].config(text=player, fg="blue" if player == "X" else "red")
             
+            # Send LED state for the taken spot
+            self.client.publish("game/led_state", f"{row},{col},taken")
+            
             self.send_board_state()  # Send updated board state to LCD esp32
 
             winner = self.check_winner()
@@ -169,8 +227,6 @@ class TicTacToe(BaseTicTacToe):
 
                 if player != self.current_player:
                     print(f"It's {self.current_player}'s turn.")
-                    messagebox.showwarning("Wrong Turn", f"It's {self.current_player}'s turn.")
-                    return
 
                 if reader in self.READER_POSITIONS:
                     row, col = self.READER_POSITIONS[reader]
@@ -208,6 +264,9 @@ class TicTacToeAI(BaseTicTacToe):
         if self.board[row][col] == "" and not self.game_over:
             self.board[row][col] = player
             self.cells[row][col].config(text=player, fg="blue" if player == "X" else "red")
+            
+            # Send LED state for the taken spot
+            self.client.publish("game/led_state", f"{row},{col},taken")
             
             self.send_board_state()  # Send updated board state to LCD esp32
 

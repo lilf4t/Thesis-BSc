@@ -65,15 +65,38 @@ class Othello:
 
     def highlight_possible_moves(self):
         moves = self.valid_moves(self.current_player)
+
+        if not moves and not self.game_over:
+            # Visa popup om inga drag är möjliga
+            messagebox.showinfo("Ingen möjlighet", f"Spelare {self.current_player} har inga möjliga drag.\nTuren går vidare.")
+            
+            # Byt spelare
+            self.current_player = "O" if self.current_player == "X" else "X"
+            self.update_status(f"Spelare {self.current_player}s tur")
+
+            # Försök igen med nästa spelare
+            moves = self.valid_moves(self.current_player)
+
+            if not moves:
+                # Om ingen har drag – avsluta spelet
+                winner = self.check_winner()
+                self.end_game(winner)
+                return
+
+        # Markera möjliga drag visuellt och via MQTT
         for row in range(4):
             for col in range(4):
                 if (row, col) in moves:
                     if self.current_player == "X":
-                        self.cells[row][col].config(bg="#C8DAFF")  # ljusblå för X
+                        self.cells[row][col].config(bg="#C8DAFF")
+                        self.client.publish("game/possible_moves", f"{row},{col},X")
                     elif self.current_player == "O":
-                        self.cells[row][col].config(bg="#FFC8C8")  # ljusröd för O
+                        self.cells[row][col].config(bg="#FFC8C8")
+                        self.client.publish("game/possible_moves", f"{row},{col},O")
                 else:
-                    self.cells[row][col].config(bg="white")  # återställ övriga
+                    self.cells[row][col].config(bg="white")
+
+
 
     def valid_moves(self, player):
         moves = []
@@ -120,11 +143,21 @@ class Othello:
         for r, c in tiles_to_flip:
             self.board[r][c] = player
         return True
+    
+    def send_board_state(self):
+        for row in range(4):
+            for col in range(4):
+                symbol = self.board[row][col]
+                if symbol in ("X", "O"):
+                    message = f"{row},{col},{symbol}"
+                    self.client.publish("game/board", message)
+
 
     def update_cell(self, row, col, player):
         if self.board[row][col] == "" and not self.game_over:
             if self.make_move(row, col, player):
                 self.update_board_display()
+                self.send_board_state()
 
                 winner = self.check_winner()
                 if winner:

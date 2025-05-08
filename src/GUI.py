@@ -22,17 +22,17 @@ def on_message(client, userdata, msg):
 
     if topic == "server/game/select":
         print(f"Message received: {payload}")
-        if payload == "tic_tac_toe":  # Button 1 pressed
-            print("Starting regular Tic Tac Toe...")
-            active_game = TicTacToe(root, client)
+        if payload == "othello":  # Button 1 pressed
+            print("Starting Othello...")
+            active_game = Othello(root, client)
             game_selected = True
         elif payload == "tic_tac_toe_ai":  # Button 2 pressed
             print("Starting Tic Tac Toe AI...")
-            active_game = TicTacToeAI(root, client)
-            game_selected = True
-        elif payload == "othello":  # Button 3 pressed
-            print("Starting Othello...")
             active_game = Othello(root, client)
+            game_selected = True
+        elif payload == "tic_tac_toe":  # Button 3 pressed
+            print("Starting regular Tic Tac Toe...")
+            active_game = TicTacToe(root, client)
             game_selected = True
         else:
             print("Unknown game:", payload)
@@ -44,7 +44,7 @@ pygame.mixer.init()
 root = tk.Tk()
 root.title("Board game")
 
-broker_ip = "172.20.10.3"
+broker_ip = "10.80.4.104"
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message

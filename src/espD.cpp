@@ -26,9 +26,13 @@
 // const int button2Pin = 33; // Tic tac toe AI
 
 // // WiFi and MQTT settings
-// const char* ssid = "fatimas lur";
-// const char* password = "jagvetinte";
-// const char* mqtt_server = "172.20.10.3";
+// // const char* ssid = "fatimas lur";
+// // const char* password = "jagvetinte";
+// // const char* mqtt_server = "172.20.10.3";
+
+// const char* ssid = "LAPTOP-24IM1PFV 1456";           // ZyXELDC2470
+// const char* password = "jagvetinte";       // KEHXTVRUHF7JF
+// const char* mqtt_server = "10.80.4.104";  // 192.168.1.57, 172.20.10.3
 
 // WiFiClient espClient;
 // PubSubClient client(espClient);

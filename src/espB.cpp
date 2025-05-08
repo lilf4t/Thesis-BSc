@@ -19,9 +19,13 @@
 // // Track if a tag is currently present on each reader
 // bool tagPresent[4] = { false, false, false, false};
 
-// const char* ssid = "fatimas lur";           // ZyXELDC2470
+// // const char* ssid = "fatimas lur";           // ZyXELDC2470
+// // const char* password = "jagvetinte";       // KEHXTVRUHF7JF
+// // const char* mqtt_server = "172.20.10.3";  // 192.168.1.57, 172.20.10.3
+
+// const char* ssid = "LAPTOP-24IM1PFV 1456";           // ZyXELDC2470
 // const char* password = "jagvetinte";       // KEHXTVRUHF7JF
-// const char* mqtt_server = "172.20.10.3";  // 192.168.1.57, 172.20.10.3
+// const char* mqtt_server = "10.80.4.104";  // 192.168.1.57, 172.20.10.3
 
 // WiFiClient espClient;
 // PubSubClient client(espClient);

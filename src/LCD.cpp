@@ -8,9 +8,10 @@
 // // const char* password = "jagvetinte";       
 // // const char* mqtt_server = "172.20.10.3";  
 
-// const char* ssid = "ZyXELDC2470";
-// const char* password = "KEHXTVRUHF7JF";
-// const char* mqtt_server = "192.168.1.57";
+// const char* ssid = "LAPTOP-24IM1PFV 1456";           // ZyXELDC2470
+// const char* password = "jagvetinte";       // KEHXTVRUHF7JF
+// const char* mqtt_server = "10.80.4.104";  // 192.168.1.57, 172.20.10.3
+
 
 // // MQTT client
 // WiFiClient lcdClient; 
