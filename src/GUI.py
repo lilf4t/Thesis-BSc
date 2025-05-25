@@ -1,10 +1,12 @@
-
 import tkinter as tk
 import paho.mqtt.client as mqtt
 import pygame
 from tkinter import simpledialog
 from ticTacToe import TicTacToe, TicTacToeAI
 from othello import Othello
+from othelloAI import OthelloAI
+from tkinter import messagebox
+
 
 
 # MQTT Callbacks
@@ -22,18 +24,24 @@ def on_message(client, userdata, msg):
 
     if topic == "server/game/select":
         print(f"Message received: {payload}")
-        if payload == "othello":  # Button 1 pressed
-            print("Starting Othello...")
-            active_game = Othello(root, client)
-            game_selected = True
-        elif payload == "tic_tac_toe_ai":  # Button 2 pressed
-            print("Starting Tic Tac Toe AI...")
-            active_game = Othello(root, client)
-            game_selected = True
-        elif payload == "tic_tac_toe":  # Button 3 pressed
-            print("Starting regular Tic Tac Toe...")
+        if payload == "tic_tac_toe":  # Button 1 pressed
+            print("Starting tic tac toe...")
             active_game = TicTacToe(root, client)
             game_selected = True
+            # Notify LED ESP32 about game type
+            client.publish("server/game/select", "tic_tac_toe")
+        elif payload == "tic_tac_toe_ai":  # Button 2 pressed
+            print("Starting Tic Tac Toe AI...")
+            active_game = TicTacToeAI(root, client)
+            game_selected = True
+            # Notify LED ESP32 about game type
+            client.publish("server/game/select", "tic_tac_toe_ai")
+        elif payload == "othello":  # Button 3 pressed
+            print("Starting othello...")
+            active_game = Othello(root, client)
+            game_selected = True
+            # Notify LED ESP32 about game type
+            client.publish("server/game/select", "othello")
         else:
             print("Unknown game:", payload)
     elif active_game:
@@ -44,7 +52,7 @@ pygame.mixer.init()
 root = tk.Tk()
 root.title("Board game")
 
-broker_ip = "10.80.4.104"
+broker_ip = "192.168.137.1" # 172.20.10.3, 10.80.4.104
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
@@ -60,8 +68,10 @@ print("Väntar på meddelande för att välja spel...")
 # while not game_selected:
 #     client.loop(timeout=0.1)
 
-active_game = TicTacToe(root, client)
+
+active_game = TicTacToe(root, client)  # Start Othello AI game
 game_selected = True  # Set to true to start the game immediately
+
 
 print("A game has been selected. Starting GUI...")
 

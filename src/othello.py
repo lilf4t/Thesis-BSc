@@ -1,62 +1,71 @@
 import tkinter as tk
 from tkinter import messagebox
 import pygame
+import math
 
-class Othello:
+class BaseOthello:
+
+    MQTT_TOPIC_NFC = "game/nfc/reader"
+    MQTT_TOPIC_BOARD = "game/board"
+    MQTT_TOPIC_RESET = "game/reset"
+    MQTT_TOPIC_POSSIBLE_MOVES = "game/possible_moves"
+
+    X_TAGS = {"8916C201", "16B10F02", "3EA6B001", "2E3EB501", "296DB701"}
+    O_TAGS = {"77700E02", "7A1CB201", "4A78C901", "91A30D02", "DB97B101"}
+
+    READER_POSITIONS = {
+        f"reader{i+1}": (i // 4, i % 4) for i in range(4 * 4)
+    }
+
     def __init__(self, root, client):
         self.root = root
         self.client = client
-        self.board = [["" for _ in range(4)] for _ in range(4)]
+        self.board = [["" for _ in range(self.BOARD_SIZE)] for _ in range(self.BOARD_SIZE)]
         self.current_player = "X"
         self.game_over = False
-        self.cells = [[None for _ in range(4)] for _ in range(4)]
-
-        self.X_TAGS = {"8916C201", "16B10F02", "3EA6B001", "2E3EB501", "296DB701"}
-        self.O_TAGS = {"77700E02", "7A1CB201", "4A78C901", "91A30D02", "DB97B101"}
-        self.READER_POSITIONS = {
-            "reader1": (0, 0), "reader2": (0, 1), "reader3": (0, 2), "reader4": (0, 3),
-            "reader5": (1, 0), "reader6": (1, 1), "reader7": (1, 2), "reader8": (1, 3),
-            "reader9": (2, 0), "reader10": (2, 1), "reader11": (2, 2), "reader12": (2, 3),
-            "reader13": (3, 0), "reader14": (3, 1), "reader15": (3, 2), "reader16": (3, 3)
-        }
+        self.cells = [[None for _ in range(self.BOARD_SIZE)] for _ in range(self.BOARD_SIZE)]
 
         self.status_label = tk.Label(root, text="", font=("Arial", 20))
-        self.status_label.grid(row=5, column=0, columnspan=4, pady=10)
+        self.status_label.grid(row=self.BOARD_SIZE + 1, column=0, columnspan=self.BOARD_SIZE, pady=10)
 
         self.setup_board()
         self.reset_game()
 
     def setup_board(self):
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 label = tk.Label(self.root, text="", font=("Arial", 30), width=4, height=2, relief="solid", bg="white")
                 label.grid(row=row, column=col, padx=2, pady=2)
                 self.cells[row][col] = label
 
         reset_button = tk.Button(self.root, text="Reset game", font=("Arial", 14), command=self.reset_game)
-        reset_button.grid(row=6, column=0, columnspan=4, pady=10)
+        reset_button.grid(row=self.BOARD_SIZE + 2, column=0, columnspan=self.BOARD_SIZE, pady=10)
 
     def reset_game(self):
-        self.client.publish("game/reset", "reset")
+        self.client.publish(self.MQTT_TOPIC_RESET, "reset")
 
-        self.board = [["" for _ in range(4)] for _ in range(4)]
+        self.board = [["" for _ in range(self.BOARD_SIZE)] for _ in range(self.BOARD_SIZE)]
         self.current_player = "X"
         self.game_over = False
 
-        # Startposition (mitten)
-        self.board[1][1] = "O"
-        self.board[2][2] = "O"
-        self.board[1][2] = "X"
-        self.board[2][1] = "X"
+        mid = self.BOARD_SIZE // 2
+        self.board[mid-1][mid-1] = "O"
+        self.board[mid][mid] = "O"
+        self.board[mid-1][mid] = "X"
+        self.board[mid][mid-1] = "X"
 
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 text = self.board[row][col]
                 color = "blue" if text == "X" else "red" if text == "O" else "black"
                 self.cells[row][col].config(text=text, fg=color, bg="white")
 
-        pygame.mixer.music.load("intro.mp3")
-        pygame.mixer.music.play()
+        try:
+            pygame.mixer.music.load("intro.mp3")
+            pygame.mixer.music.play()
+        except:
+            pass
+
         self.update_status(f"Spelare {self.current_player}s tur")
         self.highlight_possible_moves()
 
@@ -67,43 +76,26 @@ class Othello:
         moves = self.valid_moves(self.current_player)
 
         if not moves and not self.game_over:
-            # Visa popup om inga drag är möjliga
-            messagebox.showinfo("Ingen möjlighet", f"Spelare {self.current_player} har inga möjliga drag.\nTuren går vidare.")
-            
-            # Byt spelare
             self.current_player = "O" if self.current_player == "X" else "X"
             self.update_status(f"Spelare {self.current_player}s tur")
-
-            # Försök igen med nästa spelare
             moves = self.valid_moves(self.current_player)
 
-            if not moves:
-                # Om ingen har drag – avsluta spelet
-                winner = self.check_winner()
-                self.end_game(winner)
-                return
-
-        # Markera möjliga drag visuellt och via MQTT
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 if (row, col) in moves:
-                    if self.current_player == "X":
-                        self.cells[row][col].config(bg="#C8DAFF")
-                        self.client.publish("game/possible_moves", f"{row},{col},X")
-                    elif self.current_player == "O":
-                        self.cells[row][col].config(bg="#FFC8C8")
-                        self.client.publish("game/possible_moves", f"{row},{col},O")
+                    color = "#C8DAFF" if self.current_player == "X" else "#FFC8C8"
+                    self.cells[row][col].config(bg=color)
+                    message = f"{row},{col},{self.current_player}"
+                    self.client.publish(self.MQTT_TOPIC_POSSIBLE_MOVES, message)
                 else:
                     self.cells[row][col].config(bg="white")
-
-
 
     def valid_moves(self, player):
         moves = []
         opponent = "O" if player == "X" else "X"
 
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 if self.board[row][col] != "":
                     continue
                 for dr, dc in [(-1, -1), (-1, 0), (-1, 1), (0, -1),
@@ -119,7 +111,7 @@ class Othello:
         return moves
 
     def is_on_board(self, row, col):
-        return 0 <= row < 4 and 0 <= col < 4
+        return 0 <= row < self.BOARD_SIZE and 0 <= col < self.BOARD_SIZE
 
     def make_move(self, row, col, player):
         opponent = "O" if player == "X" else "X"
@@ -143,15 +135,14 @@ class Othello:
         for r, c in tiles_to_flip:
             self.board[r][c] = player
         return True
-    
+
     def send_board_state(self):
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 symbol = self.board[row][col]
                 if symbol in ("X", "O"):
                     message = f"{row},{col},{symbol}"
-                    self.client.publish("game/board", message)
-
+                    self.client.publish(self.MQTT_TOPIC_BOARD, message)
 
     def update_cell(self, row, col, player):
         if self.board[row][col] == "" and not self.game_over:
@@ -168,8 +159,8 @@ class Othello:
                     self.highlight_possible_moves()
 
     def update_board_display(self):
-        for row in range(4):
-            for col in range(4):
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
                 text = self.board[row][col]
                 color = "blue" if text == "X" else "red" if text == "O" else "black"
                 self.cells[row][col].config(text=text, fg=color, bg="white")
@@ -188,8 +179,11 @@ class Othello:
 
     def end_game(self, winner):
         self.game_over = True
-        pygame.mixer.music.stop()
-        pygame.mixer.Sound("win.mp3").play()
+        try:
+            pygame.mixer.music.stop()
+            pygame.mixer.Sound("win.mp3").play()
+        except:
+            pass
 
         if winner == "draw":
             self.update_status("Oavgjort!")
@@ -197,7 +191,7 @@ class Othello:
             self.update_status(f"Spelare {winner} vann!")
 
     def handle_message(self, topic, payload):
-        if topic == "game/nfc/reader":
+        if topic == self.MQTT_TOPIC_NFC:
             try:
                 reader, uid = payload.split(":", 1)
 
@@ -220,3 +214,69 @@ class Othello:
                     print("Okänd läsare:", reader)
             except Exception as e:
                 print("Fel i meddelande:", e)
+
+
+class Othello(BaseOthello):
+    pass  # Inga extra funktioner behövs för människa-mot-människa
+
+
+class OthelloAI(BaseOthello):
+    def update_cell(self, row, col, player):
+        super().update_cell(row, col, player)
+        if self.current_player == "O" and not self.game_over:
+            self.root.after(500, self.ai_make_move)
+
+    def ai_make_move(self):
+        best_score = -math.inf
+        best_move = None
+
+        for move in self.valid_moves("O"):
+            row, col = move
+            temp_board = [r.copy() for r in self.board]
+            self.make_move(row, col, "O")
+            score = self.minimax(3, False, -math.inf, math.inf)
+            self.board = [r.copy() for r in temp_board]
+
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        if best_move:
+            super().update_cell(best_move[0], best_move[1], "O")
+
+    def minimax(self, depth, maximizing, alpha, beta):
+        winner = self.check_winner()
+        if depth == 0 or winner:
+            return self.evaluate_board()
+
+        if maximizing:
+            max_eval = -math.inf
+            for move in self.valid_moves("O"):
+                row, col = move
+                temp_board = [r.copy() for r in self.board]
+                self.make_move(row, col, "O")
+                eval = self.minimax(depth - 1, False, alpha, beta)
+                self.board = [r.copy() for r in temp_board]
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return max_eval
+        else:
+            min_eval = math.inf
+            for move in self.valid_moves("X"):
+                row, col = move
+                temp_board = [r.copy() for r in self.board]
+                self.make_move(row, col, "X")
+                eval = self.minimax(depth - 1, True, alpha, beta)
+                self.board = [r.copy() for r in temp_board]
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return min_eval
+
+    def evaluate_board(self):
+        x_count = sum(row.count("X") for row in self.board)
+        o_count = sum(row.count("O") for row in self.board)
+        return o_count - x_count
