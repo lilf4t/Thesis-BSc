@@ -14,40 +14,68 @@ Othello, Pvp:                 https://www.youtube.com/watch?v=7IzF799TEdc
 Othello,Player vs AI:         https://www.youtube.com/watch?v=cJhUXVJmr3U
 
 
-# Project Overview
+## Project Overview
 This repository contains the source code and documentation for my bachelor's thesis project in Computer Science Engineering at Malmö University, completed in June 2025. The thesis was originally written in Swedish, but this documentation is provided in English for wider accessibility.
 
 
-# About the Project
+## About the Project
+
+This project addresses a key challenge in the world of board games: how to preserve the physical, tactile experience of traditional board games while enhancing them with modern technology. Board games have been central to human social interaction for thousands of years, but in today's digital world, they face competition from video games and mobile applications.
+
 The project focuses on developing an interactive board game system that uses RFID technology for piece recognition and provides dynamic feedback to players. The system implements both player-vs-player and player-vs-AI modes, with the AI utilizing the Minimax algorithm with Alpha-Beta pruning.
-This thesis investigates how sensor technology can be utilized to create a more engaging and interactive gaming experience. Furthermore, it analyzes how dynamic feedback can be conveyed through different channels, and how the system can support multiple different games on the same physical board. The outcome is a functional prototype that demonstrates the potential of electronic game boards to renew and increase interest in traditional board games.
 
-# Core Components
-* RFID-based piece recognition system for tracking game pieces on the board
-* ESP32 microcontroller implementation for processing and communication
-* MQTT protocol for client-server communication
-* Modular C++/Python architecture for game logic and AI
-* Interactive visual feedback system using LED strips and LCD displays
+This thesis investigates three key questions:
+1. How can sensor technology be utilized to create a more engaging and interactive gaming experience?
+2. How can dynamic feedback be conveyed through different channels to enhance gameplay?
+3. How can a modular system support multiple different games on the same physical board?
 
-# Technical Architecture
-## System Design
+The outcome is a functional prototype that demonstrates the potential of electronic game boards to renew and increase interest in traditional board games by bridging the physical and digital worlds.
+
+
+## Core Components
+* **RFID-based piece recognition system**: Tracks game pieces on the board in real time, allowing the system to understand the current game state without player input
+* **ESP32 microcontroller implementation**: Serves as the brain of the system, processing inputs from the RFID readers and controlling the feedback mechanisms
+* **MQTT protocol**: Enables efficient client-server communication between components, chosen for its lightweight nature and reliability in IoT applications
+* **Modular C++/Python architecture**: Handles game logic and AI, designed to be easily extendable to support different board games
+* **Interactive visual feedback system**: Uses LED strips and LCD displays to provide players with game information, possible moves, and status update
+
+## Technical Architecture
+### System Design
 The system follows an Internet of Things (IoT) approach, where physical game pieces interact with digital systems through RFID technology. The architecture consists of:
-1. Physical Layer: Game board with embedded PNS32 RFID sensors
-2. Communication Layer: ESP32 microcontrollers with Wi-Fi capabilities using MQTT
-3. Application Layer: Modular software architecture handling game logic and AI
 
-## Communication Protocol
+1. **Physical Layer**: Game board with embedded PNS32 RFID sensors arranged in a grid pattern. Each sensor can detect RFID tags within game pieces placed above it. This layer serves as the interface between the player's physical actions and the digital system.
+
+2. **Communication Layer**: ESP32 microcontrollers with Wi-Fi capabilities using MQTT. This layer manages the transmission of game state information between the physical components and the application layer. We chose ESP32 for its balance of processing power, connectivity options, and cost-effectiveness.
+
+3. **Application Layer**: Modular software architecture handling game logic and AI. This layer interprets the game state, enforces rules, manages player turns, and in AI mode, calculates optimal moves. It also sends commands to the feedback systems.
+
+### Communication Protocol
 The system uses MQTT (Message Queuing Telemetry Transport) for efficient client-server communication. This lightweight protocol is ideal for IoT applications due to its low bandwidth requirements and reliability in networks with varying levels of latency.
 
-## AI Implementation
-For player-vs-AI mode, the system implements the Minimax algorithm with Alpha-Beta pruning optimization to create a challenging opponent while maintaining reasonable computation times.
+MQTT functions on a publish/subscribe model, where:
+- The RFID readers publish messages about piece movements and positions
+- The game logic module subscribes to these messages to update the game state
+- The feedback systems subscribe to game state updates to provide appropriate visual cues
+- The AI module publishes move decisions when in player-vs-AI mode
 
-# Hardware Components
-## RFID Technology
+This architecture allows for a decoupled system where components can be upgraded or replaced without affecting the entire system.
+
+### AI Implementation
+For player-vs-AI mode, the system implements the Minimax algorithm with Alpha-Beta pruning optimization. Minimax is a decision-making algorithm that recursively evaluates possible moves by simulating future game states:
+
+1. The algorithm examines all possible moves and their consequences several moves ahead
+2. It assumes the opponent will make the most optimal moves (minimizing the player's advantage)
+3. The AI selects the move that maximizes its advantage given optimal opponent play
+4. Alpha-Beta pruning significantly improves efficiency by eliminating branches that cannot influence the final decision
+
+The implementation balances computational constraints with providing a challenging opponent. For games with larger decision trees like Othello, the search depth is adjusted to maintain reasonable response times while still offering strategic play.
+
+## Hardware Components
+### RFID Technology
 The game uses RFID (Radio Frequency Identification) technology to identify and track the position of game pieces on the board. Each game piece contains an RFID tag with a unique identifier, which is read by sensors embedded in the game board.
 
-# Diagrams
-## System overview
+## Diagrams
+### System overview
 <img width="1179" height="675" alt="image" src="https://github.com/user-attachments/assets/298ac0f7-ef75-442a-a629-1056479ac1b7" />
 
 ## Wiring diagram for ESP32 and PN532 RFID readers connected via SPI
@@ -61,29 +89,29 @@ ESP B (8 PN532 readers): handles eight RFID readers via SPI.
 
 The system contains two such devices.
 
-## Wiring diagram for ESP32 and five push buttons
+### Wiring diagram for ESP32 and five push buttons
 <img width="456" height="719" alt="image" src="https://github.com/user-attachments/assets/0ab14e64-ec3c-4f36-a06d-e3e58b197e7d" />
 
 Handles five push buttons for game selection and reset.
 
-## Wiring diagram for ESP32 and two TFT/LCD displays
+### Wiring diagram for ESP32 and two TFT/LCD displays
 <img width="420" height="722" alt="image" src="https://github.com/user-attachments/assets/69b8a9b4-fde8-4e46-a250-723b1bd2abc8" />
 
 Drives two TFT/LCD screens (one per player).
 
-## Wiring diagram for ESP32 and 16 LED strips
+### Wiring diagram for ESP32 and 16 LED strips
 <img width="1219" height="638" alt="image" src="https://github.com/user-attachments/assets/e70308c4-c301-485f-8d1c-7ed7bc369615" />
 
 Controls 16 LED strips on digital outputs.
 
-## Full prototype
+### Full prototype
 
 <img width="1600" height="1166" alt="image" src="https://github.com/user-attachments/assets/6d619a9e-b76e-4936-852b-6584f4e28722" />
 
 The readers are intended to be mounted in a 4×4 grid with ~2cm spacing below the board surface. All modules are sample mounted on breadboards. The wiring diagram shows GPIO pins for each ESP32, including CS/MOSI/MISO/SCK for SPI modules and digital pins for LEDs/buttons. The buttons use internal pull-up resistors, eliminating the need for external components.
 
-# Software Implementation
-## Code Structure
+## Software Implementation
+### Code Structure
 The software architecture is modular and consists of several key components:
 1. RFID Reader Module: C++ code for interfacing with the RFID sensors
 2. Communication Module: Implementation of MQTT client for message passing
@@ -91,7 +119,7 @@ The software architecture is modular and consists of several key components:
 4. AI Module: Minimax algorithm with Alpha-Beta pruning for computer player
 5. Feedback Module: Control of LED strips, LCD displays and a visual GUI for user feedback
 
-# Game Class diagram
+## Game Class diagram
 <img width="882" height="678" alt="image" src="https://github.com/user-attachments/assets/c62f2d9e-e0ca-4778-afac-08fc13c647c4" />
 
 To support multiple games on the same physical board, a flexible software architecture based on inheritance and polymorphism was developed. An abstract base class 'Base Game' defines basic game interfaces and functionality that is common to all board games, such as:
@@ -102,32 +130,58 @@ To support multiple games on the same physical board, a flexible software archit
 
 Each game is implemented as a subclass of the base class and inherits the common functionality. The class diagram below is an example of how a game class 'BaseTicTacToe' inherits functions from the base class, with an additional level of inheritance if you want to create the same game with multiple variants.
 
-# Overall Class diagram
+## Overall Class diagram
 
 <img width="1350" height="882" alt="image" src="https://github.com/user-attachments/assets/8dd96206-90d5-4899-b2d5-2a1a38ae3f88" />
 
 
-# Feedback tools
+## Feedback tools
 
-## GUI
+### GUI
 <img width="591" height="788" alt="image" src="https://github.com/user-attachments/assets/e5f3425f-688d-41bc-8ea3-8531a7200fad" />
 <img width="507" height="668" alt="image" src="https://github.com/user-attachments/assets/75748d88-2bb9-4b7b-93bc-070503db4df9" />
 
-## LCD
+### LCD
 <img width="1600" height="1481" alt="image" src="https://github.com/user-attachments/assets/e8b9d14a-9bad-43c6-a694-ba933ae6ed9e" />
 
-## LED
+### LED
 <img width="1600" height="1200" alt="image" src="https://github.com/user-attachments/assets/80c9616b-fe15-4de7-9796-ff12e3d8eca7" />
 
+## Issues and challenges
 
-# Project Results
+During development, several technical challenges were encountered:
+
+* **RFID Interference**: Closely placed readers caused occasional misreads and signal strength variations
+* **Hardware Integration**: Soldering errors and limited breadboard space complicated the physical assembly
+* **Communication Delays**: MQTT messages occasionally experienced latency under high system load
+* **Power Management**: LED strips created power spikes affecting microcontroller stability
+
+## Testing Methodology
+
+The system underwent progressive testing phases:
+
+## Component Testing
+Individual hardware components (RFID readers, ESP32s, displays) were tested in isolation to verify functionality.
+
+## Integration Testing
+Subsystems were tested together, with communication between ESP32 units measured for latency and reliability.
+
+## System Testing
+Complete end-to-end testing included gameplay scenarios for both Tic-tac-toe and Othello, measuring AI response time and evaluating feedback clarity.
+
+## User Testing
+Both experienced and novice players tested the system, evaluating usability, rule enforcement, and overall engagement.
+
+A longer, more detailed test cases are written about in the thesis (chapter 5.5).
+
+## Project Results
 The final system successfully demonstrates how traditional board games can be enhanced with digital technology while maintaining the tactile experience of physical play. The project achieved:
 - Reliable piece recognition using RFID technology
 - Low-latency communication between physical board and digital systems (most of the time, read thesis document 5.4.4 for commonly shown issues).
 - Intuitive visual feedback through integrated displays
 - Challenging AI opponent using optimized game tree search
 
-# Prototype initial drawing
+## Prototype initial drawing
 <img width="1552" height="1670" alt="image" src="https://github.com/user-attachments/assets/fb5f9535-4a76-443f-9328-f305983707d6" />
 <img width="1723" height="1856" alt="image" src="https://github.com/user-attachments/assets/7d910ab5-9a46-4bd2-8934-61b46f0d8966" />
 
@@ -143,7 +197,7 @@ Drawing the necessary parts in Adobe Illustrator.
 ![IMG_1213](https://github.com/user-attachments/assets/7fff13b6-f33d-4ddb-b45b-1bbefc95ac1e)
 Cutting them out.
 
-# Final prototype
+## Final prototype
 ![IMG_2548](https://github.com/user-attachments/assets/7f962e9b-735b-414e-ad2c-10620ea6a11c)
 
 ![IMG_2546](https://github.com/user-attachments/assets/800329ad-5383-4375-875c-9f3a16ee24b1)
@@ -152,7 +206,7 @@ Cutting them out.
 
 We unfortunately did not have enough time to finish the board, as soldering every individual component took a lot of time (and caused a lot of error...).
 
-# Future Work
+## Future Work
 Potential extensions to this project include:
 - Support for additional board games beyond the current implementation
 - Improved AI using machine learning techniques
