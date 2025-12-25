@@ -156,7 +156,7 @@ During development, several technical challenges were encountered:
 * **Communication Delays**: MQTT messages occasionally experienced latency under high system load
 * **Power Management**: LED strips created power spikes affecting microcontroller stability
 
-## Testing Methodology
+# Testing Methodology
 
 The system underwent progressive testing phases:
 
